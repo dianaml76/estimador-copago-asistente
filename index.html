@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asistente Salud - Copago</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}body{background:linear-gradient(145deg,#c0e0f5,#e9f4fb);font-family:system-ui,'Segoe UI',sans-serif;min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px}.chat{max-width:880px;width:100%;background:rgba(255,255,255,0.96);border-radius:40px;box-shadow:0 25px 45px -12px rgba(0,0,0,0.35);overflow:hidden;display:flex;flex-direction:column;height:85vh;max-height:820px}.chat-header{background:linear-gradient(135deg,#0a2f44,#0b3b5f);color:#fff;padding:22px 24px;text-align:center}.chat-header h1{font-size:1.7rem;display:flex;align-items:center;justify-content:center;gap:12px}.chat-header p{font-size:.85rem;opacity:.85;margin-top:6px}.messages{flex:1;overflow-y:auto;padding:24px 20px;display:flex;flex-direction:column;gap:18px;background:#f9fdfe}.message{display:flex;max-width:82%;animation:fadeInUp .2s ease}.message.user{align-self:flex-end}.message.assistant{align-self:flex-start}.bubble{padding:12px 18px;border-radius:28px;line-height:1.45;font-size:.95rem}.user .bubble{background:#0b3b5f;color:#fff;border-bottom-right-radius:8px;background-image:linear-gradient(145deg,#0f466b,#0b3b5f)}.assistant .bubble{background:#fff;color:#1a2c3e;border:1px solid #dee4e9;border-bottom-left-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.05)}.input-area{padding:16px 20px 22px;background:#fff;border-top:1px solid #e2edf2;display:flex;gap:12px}.input-area input{flex:1;padding:14px 20px;border:1px solid #cfdfe8;border-radius:60px;font-size:1rem}.input-area input:focus{outline:none;border-color:#0b3b5f;box-shadow:0 0 0 3px rgba(11,59,95,0.2)}.input-area button{background:linear-gradient(145deg,#0b3b5f,#0a2f4a);border:none;padding:0 28px;border-radius:60px;font-weight:600;color:#fff;cursor:pointer;transition:.2s;box-shadow:0 4px 8px rgba(0,0,0,0.1)}.input-area button:hover{transform:translateY(-2px);background:linear-gradient(145deg,#0f4c75,#0b3b5f)}.plan-buttons{display:flex;gap:14px;margin-top:14px;flex-wrap:wrap}.plan-btn{background:#ecf3f8;border:none;padding:10px 22px;border-radius:60px;font-weight:600;cursor:pointer;transition:.2s;color:#0b3b5f;box-shadow:0 2px 4px rgba(0,0,0,0.05)}.plan-btn:hover{background:#dee9f0;transform:translateY(-2px)}.reset-btn{background:#f0f2f5;border:1px solid #cbdae2;color:#2c4c6e}footer{font-size:.7rem;text-align:center;padding:12px;background:#fff;border-top:1px solid #e9f0f3;color:#5f7f9c}@keyframes fadeInUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}@media(max-width:560px){.message{max-width:95%}.chat{height:95vh}.plan-btn{padding:6px 14px;font-size:.75rem}}
+    </style>
+</head>
+<body>
+<div class="chat">
+    <div class="chat-header"><h1>🏥 Asistente de Salud</h1><p>🔎 Copago exacto | 🏨 Hospital más económico</p></div>
+    <div class="messages" id="chatMessages"><div class="message assistant"><div class="bubble">👋 Hola. Cuéntame tu síntoma principal.</div></div></div>
+    <div class="input-area"><input type="text" id="userInput" placeholder="Escribe tu síntoma..."><button id="sendBtn">Enviar</button></div>
+    <footer>💰 Precios simulados · Básico (pagas 40%) · Estándar (25%) · Premium (10%)</footer>
+</div>
+<script>
+// Especialidades con keywords y peso
+const specialities = [
+    { esp:"Alergología", kw:["alergia","estornudos","goteo nasal","congestión nasal","ojos llorosos","picazón en ojos","urticaria","ronchas","erupción","eccema","dermatitis de contacto","piel seca","ampollas","hinchazón labios","hinchazón lengua","dificultad para respirar","anafilaxia","mariscos","camarones","cacahuetes","maní","ácidos del polvo","caspa de mascotas","esporas de moho","dolor abdominal por alergia","diarrea por alergia","vómitos por alergia","alergia alimentaria","reacción alérgica","comí"], peso:4 },
+    { esp:"Urología", kw:["testículos","dolor testicular","orinar","dificultad para orinar","chorro débil","goteo","sangre orina","hematuria","dolor al orinar","micción frecuente","urgencia","próstata"], peso:3 },
+    { esp:"Ginecología", kw:["vello facial","períodos irregulares","acné persistente","infección vaginal","picazón vaginal","secreción anormal","candidiasis","vaginosis","miomas","sangrado abundante","presión pélvica","dolor relaciones","mamas","seno","chequeo mamas"], peso:3 },
+    { esp:"Cardiología", kw:["taquicardia","palpitaciones","corazón acelerado","arritmia","dolor pecho","opresión torácica","presión alta","hipertensión","dolor pecho actividad"], peso:3 },
+    { esp:"Psiquiatría", kw:["problemas de sueño","insomnio","despertar frecuente","hipersomnia","tristeza persistente","ansiedad excesiva","irritabilidad","pérdida interés","alucinaciones","delirios","pensamientos suicidas"], peso:3 },
+    { esp:"Psicología", kw:["apatía","falta interés","pensamientos catastróficos","pesimismo","problemas concentración","baja autoestima","dependencia emocional","culpa","fobia"], peso:2 },
+    { esp:"Otorrinolaringología", kw:["dolor oído","infección oído","otitis","secreción oído","audición amortiguada","dolor garganta recurrente","congestión nasal","rinorrea","presión sinusal","dolor facial","resfriado","goteo nasal"], peso:2 },
+    { esp:"Neurología", kw:["dolor cabeza","cefalea","migraña","vértigo","inestabilidad","parestesia","hormigueo","temblor","convulsiones","pérdida memoria"], peso:2 },
+    { esp:"Dermatología", kw:["piel","erupción","sarpullido","dermatitis","psoriasis","acné","granos","impétigo","foliculitis","hongos","verrugas","sarna"], peso:2 },
+    { esp:"Gastroenterología", kw:["dolor abdominal","dolor estómago","dolor barriga","gastritis","úlcera","reflujo","acidez","ardor","hinchazón","gases","diarrea","estreñimiento","colon irritable"], peso:2 },
+    { esp:"Neumología", kw:["tos","expectoración","flema","falta aire","dificultad respiratoria","disnea","sibilancias"], peso:2 },
+    { esp:"Medicina General", kw:["fiebre","calentura","cansancio","fatiga","agotamiento","dolor general"], peso:1 }
+];
+
+const planes = {"Plan Básico":{c:0.6,l:"Básico (pagas 40%)"},"Plan Estándar":{c:0.75,l:"Estándar (pagas 25%)"},"Plan Premium":{c:0.9,l:"Premium (pagas 10%)"}};
+const hosp = {
+    "Hospital Norte":{ "Medicina General":45,"Neurología":60,"Odontología":40,"Otorrinolaringología":55,"Neumología":55,"Cardiología":60,"Gastroenterología":58,"Dermatología":55,"Psiquiatría":55,"Psicología":50,"Urología":55,"Ginecología":55,"Endocrinología":58,"Infectología":56,"Alergología":60 },
+    "Hospital Centro":{ "Medicina General":40,"Neurología":55,"Odontología":35,"Otorrinolaringología":50,"Neumología":50,"Cardiología":55,"Gastroenterología":52,"Dermatología":50,"Psiquiatría":50,"Psicología":45,"Urología":50,"Ginecología":50,"Endocrinología":52,"Infectología":52,"Alergología":50 },
+    "Hospital Sur":{ "Medicina General":42,"Neurología":58,"Odontología":38,"Otorrinolaringología":52,"Neumología":52,"Cardiología":58,"Gastroenterología":55,"Dermatología":52,"Psiquiatría":52,"Psicología":47,"Urología":52,"Ginecología":52,"Endocrinología":55,"Infectología":54,"Alergología":55 }
+};
+
+let state = { step:"symptom", symptom:"", sex:null, age:null, specialty:null, plan:null };
+const msgDiv = document.getElementById("chatMessages"), inp = document.getElementById("userInput"), btn = document.getElementById("sendBtn");
+
+function add(role, text, html=0){ let d=document.createElement("div"); d.className=`message ${role}`; let b=document.createElement("div"); b.className="bubble"; if(html) b.innerHTML=text; else b.innerText=text; d.appendChild(b); msgDiv.appendChild(d); msgDiv.scrollTop=msgDiv.scrollHeight; }
+
+function suggestSpecialty(symptom, sex, age){
+    let lower = symptom.toLowerCase();
+    let best = { esp:"Medicina General", score:0 };
+    for(let s of specialities){
+        let score = 0;
+        for(let kw of s.kw) if(lower.includes(kw)) score += s.peso;
+        if(score > best.score) best = { esp:s.esp, score };
+    }
+    let esp = best.esp;
+    // Refinamientos
+    if(esp==="Gastroenterología" && lower.includes("dolor abdominal")){
+        if(sex==="femenino") esp = "Ginecología";
+        else if(sex==="masculino" && age>50) esp = "Urología";
+    }
+    if(esp==="Medicina General" && (lower.includes("fatiga")||lower.includes("cansancio")) && age>60) esp = "Cardiología";
+    if(esp==="Cardiología" && sex==="femenino" && age<50 && (lower.includes("ansiedad")||lower.includes("problemas de sueño"))) esp = "Psiquiatría";
+    if((lower.includes("ronchas")||lower.includes("urticaria")) && (lower.includes("camarones")||lower.includes("mariscos")||lower.includes("comí")||lower.includes("alergia"))) esp = "Alergología";
+    if(lower.includes("testículos")||lower.includes("dificultad para orinar")) esp = "Urología";
+    if(lower.includes("taquicardia")||lower.includes("palpitaciones")) esp = "Cardiología";
+    return esp;
+}
+
+function copago(cb,c){ return Math.round(cb*(1-c)); }
+function ranking(esp,plan){ let p=planes[plan]; if(!p) return null; let r=[]; for(let[h,cs] of Object.entries(hosp)){ let cb=cs[esp]; if(cb) r.push({h,cb,cp:copago(cb,p.c)}); } if(!r.length) return null; r.sort((a,b)=>a.cp-b.cp); return {m:r[0],t:r}; }
+
+function showResults(){
+    if(!state.plan||!state.specialty) return;
+    let r=ranking(state.specialty,state.plan);
+    if(!r){ add("assistant",`Sin datos para "${state.specialty}". Escribe "nuevo".`); state.step="result"; return; }
+    let m=r.m, porc=planes[state.plan].c*100;
+    let html=`<strong>✅ ${state.plan}</strong> (cubre ${porc}%)<br><br>🏥 <strong>Más económico:</strong> ${m.h}<br>💰 <strong>Tu copago:</strong> $${m.cp}<br>📋 Costo base: $${m.cb}<br><br><strong>Comparativa red:</strong><br>`;
+    r.t.forEach(h=>{ html+=`• ${h.h}: copago $${h.cp} (base $${h.cb})<br>`; });
+    html+=`<br><em>💡 Escribe "nuevo" para otra consulta.</em>`;
+    add("assistant",html,1);
+    state.step="result";
+}
+
+function renderPlanButtons(){
+    let c=document.createElement("div"); c.className="plan-buttons";
+    for(let[n,i] of Object.entries(planes)){ let b=document.createElement("button"); b.innerText=i.l; b.className="plan-btn"; b.onclick=()=>{ state.plan=n; add("user",`Seleccioné: ${i.l}`); showResults(); }; c.appendChild(b); }
+    let r=document.createElement("button"); r.innerText="↻ Nueva consulta"; r.className="plan-btn reset-btn"; r.onclick=()=>reset(); c.appendChild(r);
+    let w=document.createElement("div"); w.className="message assistant"; let bu=document.createElement("div"); bu.className="bubble";
+    bu.appendChild(document.createTextNode("Elige tu plan: ")); bu.appendChild(c); w.appendChild(bu); msgDiv.appendChild(w); msgDiv.scrollTop=msgDiv.scrollHeight;
+}
+
+function askSex(){ add("assistant","📌 ¿Sexo biológico? (masculino / femenino)"); state.step="asking_sex"; }
+function askAge(){ add("assistant","📌 ¿Edad? (número)"); state.step="asking_age"; }
+function reset(){ state={step:"symptom",symptom:"",sex:null,age:null,specialty:null,plan:null}; while(msgDiv.children.length>1) msgDiv.removeChild(msgDiv.lastChild); add("assistant","🔄 Reiniciado. Cuéntame tu síntoma."); }
+
+function process(txt){
+    let t=txt.trim().toLowerCase();
+    if(t==="nuevo"||t==="reiniciar"){ reset(); return; }
+    if(state.step==="symptom"){ state.symptom=txt; add("user",txt); askSex(); }
+    else if(state.step==="asking_sex"){
+        if(t==="masculino"||t==="femenino"){ state.sex=t; add("user",t); askAge(); }
+        else add("assistant","Escribe 'masculino' o 'femenino'.");
+    }
+    else if(state.step==="asking_age"){
+        let a=parseInt(t);
+        if(!isNaN(a) && a>0 && a<120){ state.age=a; add("user",t);
+            let esp=suggestSpecialty(state.symptom, state.sex, state.age);
+            state.specialty=esp;
+            add("assistant",`🔍 Basado en todo, sugiero consultar con <strong>${esp}</strong>.`,1);
+            renderPlanButtons();
+            state.step="waitingPlan";
+        } else add("assistant","Edad inválida (1-120).");
+    }
+    else if(state.step==="waitingPlan"){
+        let found=null; for(let p of Object.keys(planes)) if(t.includes(p.toLowerCase())){ found=p; break; }
+        if(found){ state.plan=found; add("user",txt); showResults(); }
+        else add("assistant","❌ No reconocí el plan. Usa botones o 'nuevo'.");
+    }
+    else if(state.step==="result") add("assistant","Escribe 'nuevo' para reiniciar.");
+}
+
+btn.onclick=()=>{ let v=inp.value.trim(); if(v) process(v); inp.value=""; };
+inp.addEventListener("keypress",e=>{if(e.key==="Enter")btn.click();});
+inp.focus();
+</script>
+</body>
+</html>
