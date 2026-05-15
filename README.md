@@ -5,6 +5,15 @@ ________________________________________________________________________________
 
 Agente conversacional que ayuda a pacientes de seguros de salud a entender cuánto pagarán (copago) y qué hospital de la red les conviene más económicamente, según su síntoma, sexo, edad y plan de seguro.
 
+## 🤖 Uso de Inteligencia Artificial en este reto
+Este agente fue desarrollado íntegramente con la asistencia de **DeepSeek (IA)**, una herramienta de inteligencia artificial generativa. La IA participó en:
+- Generación del código HTML, CSS y JavaScript.
+- Diseño de la lógica de reconocimiento de síntomas y derivación a especialidades médicas.
+- Creación de la base de conocimiento (síntomas, especialidades, precios y reglas por sexo/edad).
+- Optimización del código y mejora de la interfaz conversacional.
+
+El uso de IA fue fundamental para cumplir con el reto en tiempo récord, demostrando cómo estas herramientas pueden acelerar el desarrollo de soluciones corporativas en salud.
+
 ## 🚀 Enlace público del agente
 https://dianaml76.github.io/estimador-copago-asistente/
 
