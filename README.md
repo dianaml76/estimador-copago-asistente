@@ -6,7 +6,7 @@ ________________________________________________________________________________
 Agente conversacional que ayuda a pacientes de seguros de salud a entender cuánto pagarán (copago) y qué hospital de la red les conviene más económicamente, según su síntoma, sexo, edad y plan de seguro.
 
 ## 🚀 Enlace público del agente
-
+https://dianaml76.github.io/estimador-copago-asistente/
 
 ## 📋 Características principales
 - ✅ **Detección inteligente de síntomas** – Reconoce más de 100 palabras clave y deriva a la especialidad médica correspondiente (Alergología, Cardiología, Dermatología, Endocrinología, Gastroenterología, Ginecología, Infectología, Medicina General, Neumología, Neurología, Odontología, Otorrinolaringología, Psiquiatría, Psicología, Urología).
