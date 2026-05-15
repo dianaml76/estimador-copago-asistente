@@ -49,5 +49,9 @@ https://dianaml76.github.io/estimador-copago-asistente/
 ## 📄 Licencia
 MIT – Libre de usar, modificar y distribuir.
 
+## 📱 Diseño responsive
+El asistente se adapta automáticamente a cualquier dispositivo:
+- **Escritorio**: aprovecha el ancho completo con burbujas de hasta 82%.
+- **Tablet y móvil**: los mensajes ocupan hasta el 95% del ancho, los botones se reducen y el contenedor se ajusta a la altura de la pantalla (95vh) para una experiencia cómoda.
 ---
 *Desarrollado para el HackIAthon – Reto 3: Estimador Agéntico de Copago y Cobertura.*
